@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script>
+        //
+        //Get the image selected by the user.
+        function load_image() {
+            //
+            const image = document.getElementById('img');
+            //
+            //Get the input tag of type file.
+            const file = document.querySelector('input[type=file]').files[0];
+            //
+            //Read the file contents (or raw data buffers) stored on the user's computer.
+            const reader = new FileReader();
+            //
+            reader.readAsBinaryString(file);
+            //
+            //Get the file contents and do something with the result.
+            reader.addEventListener("load", () => {
+                //
+                // image.src = reader.result;
+                //
+                //The content of the file.
+                const content = event.target.result;
+                //
+                //Send the image data to the server.
+                post_image(btoa(content));
+                //
+                console.log(content);
+            }, false);
+        }
+        //
+        async function post_image(content) {
+            //
+            const myHeaders = new Headers();
+            myHeaders.append('Accept', 'image/jpeg');
+
+            let fd = new FormData();
+            fd.append("content", content);
+            //
+            const response = await fetch(`http://localhost/test/image_upload.php`, {method: "POST", body: fd});
+            //
+            console.log(response);
+        }
+        //
+        //Get the current location of the computer.
+        function get_location() {
+            //
+            //Ensure the browser supports GeoLocation feature.
+            if (navigator.geolocation) {
+                navigator.geolocation.watchPosition(position => {
+                    //
+                    //Get the element in which to display the coordinates.
+                    let coordinates = document.getElementById("coordinates");
+                    //
+                    //Append the coorinates to the element.
+                    coordinates.innerHTML = "Latitude: " + position.coords.accuracy +
+                        "<br>Longitude: " + position.coords.longitude;
+                });
+            } else {
+                coordinates.innerHTML = "Geolocation is not supported by this browser.";
+            }
+        }
+    </script>
+</head>
+
+<body onload="get_location()">
+
+    <label> IMAGE AND GEOLOCATION SIMULATION</label>
+    <br><br>
+
+    <input type="file" id="image" onchange="load_image()">
+    <img src="" alt="" id="img">
+
+    <div id="demo"></div>
+</body>
+
+</html>
